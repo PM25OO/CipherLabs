@@ -3,14 +3,14 @@ import tkinter as tk
 from tkinter import messagebox, scrolledtext
 
 
-SIZE = 33
-PLAINTEXT_BLOCK_SIZE = 31
+SIZE = 129
+PLAINTEXT_BLOCK_SIZE = 127
 DEFAULT_E = 65537
-MILLER_RABIN_ROUNDS = 16
+MILLER_RABIN_ROUNDS = 20
 
 
 class BigUInt:
-	"""固定长度 33 字节、基数 256 的无符号大整数表示。"""
+	"""固定长度 SIZE 字节、基数 256 的无符号大整数表示。"""
 
 	__slots__ = ("digits",)
 
@@ -58,7 +58,7 @@ class BigUInt:
 
 
 class RSA:
-	"""教学演示版 RSA：随机 128bit 素数 + UTF-8 分块加解密。"""
+	"""教学演示版 RSA：随机 512bit 素数 + UTF-8 分块加解密。"""
 
 	@staticmethod
 	def gcd(a: int, b: int) -> int:
@@ -109,16 +109,16 @@ class RSA:
 		return True
 
 	@classmethod
-	def _random_128bit_odd(cls) -> int:
-		candidate = secrets.randbits(128)
-		candidate |= (1 << 127)
+	def _random_512bit_odd(cls) -> int:
+		candidate = secrets.randbits(512)
+		candidate |= (1 << 511)
 		candidate |= 1
 		return candidate
 
 	@classmethod
-	def _random_prime_128bit(cls) -> int:
+	def _random_prime_512bit(cls) -> int:
 		while True:
-			candidate = cls._random_128bit_odd()
+			candidate = cls._random_512bit_odd()
 			if cls._is_probable_prime(candidate):
 				return candidate
 
@@ -136,8 +136,8 @@ class RSA:
 		random_mode = p is None and q is None
 		if random_mode:
 			while True:
-				p_int = self._random_prime_128bit()
-				q_int = self._random_prime_128bit()
+				p_int = self._random_prime_512bit()
+				q_int = self._random_prime_512bit()
 				if p_int == q_int:
 					continue
 				phi_int = (p_int - 1) * (q_int - 1)
@@ -264,7 +264,7 @@ class RSAApp:
 		tk.Label(header, text="RSA 加解密程序", font=title_font, bg="#f5f7fb", fg="#1f2d3d").pack(anchor="w")
 		tk.Label(
 			header,
-			text="每次随机生成 128bit 的 p 和 q，e 固定为 65537。",
+			text="每次随机生成 512bit 的 p 和 q，e 固定为 65537。",
 			font=("Microsoft YaHei", 9),
 			bg="#f5f7fb",
 			fg="#5c677d",
@@ -290,8 +290,8 @@ class RSAApp:
 			pady=6,
 		).pack(anchor="w")
 
-		tk.Label(key_frame, text="当前密钥（基数 256，无符号字节数组，SIZE=33）", font=("Microsoft YaHei", 9), bg="#f5f7fb", fg="#666666").pack(anchor="w", pady=(10, 4))
-		self.key_info_display = tk.Text(key_frame, height=5, font=("Consolas", 9), relief=tk.SUNKEN, bd=1, bg="#eeeeee", state=tk.DISABLED)
+		tk.Label(key_frame, text=f"当前密钥（基数 256，无符号字节数组，SIZE={SIZE}）", font=("Microsoft YaHei", 9), bg="#f5f7fb", fg="#666666").pack(anchor="w", pady=(10, 4))
+		self.key_info_display = tk.Text(key_frame, height=8, font=("Consolas", 9), relief=tk.SUNKEN, bd=1, bg="#eeeeee", state=tk.DISABLED)
 		self.key_info_display.pack(fill=tk.X)
 
 		btn_frame = tk.LabelFrame(form, text="操作区", font=label_font, bg="#f5f7fb", padx=10, pady=12)
